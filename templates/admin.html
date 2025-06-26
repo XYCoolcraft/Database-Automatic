@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Database Keamanan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 900px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2, h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            display: inline-block;
+            margin: 0 5px;
+        }
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .toggle-btn.active {
+            background-color: #28a745;
+        }
+        .toggle-btn.active:hover {
+            background-color: #218838;
+        }
+        .toggle-btn.false {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .toggle-btn.false:hover {
+            background-color: #e0a800;
+        }
+        .add-number-section {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .add-number-section input[type="text"] {
+            width: calc(100% - 120px);
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .add-number-section button {
+            background-color: #007bff;
+            width: auto;
+        }
+        .add-number-section button:hover {
+            background-color: #0056b3;
+        }
+        .logout-button-container {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 900px;
+            text-align: right;
+        }
+        .logout-button {
+            background-color: #dc3545;
+            padding: 10px 15px;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+        .flash {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            text-align: left;
+        }
+        .flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .flash.warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .flash.info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Panel Administrator</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <h3>Daftar Nomor WhatsApp</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nomor</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in database %}
+                <tr>
+                    <td>{{ entry.nomor }}</td>
+                    <td>{{ entry.status }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin_panel') }}">
+                            <input type="hidden" name="action" value="toggle_status">
+                            <input type="hidden" name="nomor" value="{{ entry.nomor }}">
+                            <button type="submit" class="toggle-btn {{ 'active' if entry.status == 'active' else 'false' }}">
+                                {{ 'Non-aktifkan' if entry.status == 'active' else 'Aktifkan' }}
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin_panel') }}">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="nomor" value="{{ entry.nomor }}">
+                            <button type="submit" class="delete-btn">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="add-number-section">
+            <h3>Tambahkan Nomor Baru (Admin)</h3>
+            <form method="POST" action="{{ url_for('admin_panel') }}">
+                <input type="hidden" name="action" value="add">
+                <input type="text" name="new_nomor" placeholder="Contoh: 6281234567890" required>
+                <button type="submit">Tambah Nomor</button>
+            </form>
+        </div>
+    </div>
+    <div class="logout-button-container">
+        <form action="{{ url_for('logout') }}" method="GET">
+            <button type="submit" class="logout-button">Logout</button>
+        </form>
+    </div>
+</body>
+</html>
